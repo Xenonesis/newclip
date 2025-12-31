@@ -54,8 +54,8 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "/login",
-    signUp: "/signup",
     error: "/login",
+    // Note: signUp is handled separately via custom registration page
   },
   callbacks: {
     async session({ session, token }) {

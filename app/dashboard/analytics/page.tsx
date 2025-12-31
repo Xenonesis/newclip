@@ -156,7 +156,7 @@ export default function AnalyticsPage() {
                   borderRadius: '8px',
                   color: '#f8fafc'
                 }}
-                formatter={(value: number) => formatNumber(value)}
+                formatter={(value) => formatNumber(value as number)}
               />
               <Area 
                 type="monotone" 

@@ -40,9 +40,14 @@ export function CardHeader({ children, className }: { children: React.ReactNode;
   );
 }
 
-export function CardContent({ children, className }: { children: React.ReactNode; className?: string }) {
+interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export function CardContent({ children, className, ...props }: CardContentProps) {
   return (
-    <div className={cn('p-4', className)}>
+    <div className={cn('p-4', className)} {...props}>
       {children}
     </div>
   );

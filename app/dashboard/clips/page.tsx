@@ -186,10 +186,8 @@ export default function ClipsPage() {
           icon={Sparkles}
           title="No clips found"
           description={search ? 'Try a different search term' : 'Upload a video to generate clips'}
-          action={{
-            label: 'Upload Video',
-            onClick: () => window.location.href = '/dashboard/upload'
-          }}
+          actionLabel="Upload Video"
+          onAction={() => window.location.href = '/dashboard/upload'}
         />
       )}
 

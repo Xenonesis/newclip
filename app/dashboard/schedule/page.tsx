@@ -300,10 +300,8 @@ export default function SchedulePage() {
                 icon={Calendar}
                 title="No scheduled posts"
                 description="Schedule some clips to see them here"
-                action={{
-                  label: 'Browse Clips',
-                  onClick: () => window.location.href = '/dashboard/clips'
-                }}
+                actionLabel="Browse Clips"
+                onAction={() => window.location.href = '/dashboard/clips'}
               />
             ) : (
               <div className="space-y-3">
