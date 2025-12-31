@@ -2,6 +2,7 @@
 
 import { Button } from './Button';
 import { LucideIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface EmptyStateProps {
   icon: LucideIcon;
@@ -10,6 +11,7 @@ interface EmptyStateProps {
   actionLabel?: string;
   onAction?: () => void;
   actionHref?: string;
+  className?: string;
 }
 
 export function EmptyState({
@@ -19,6 +21,7 @@ export function EmptyState({
   actionLabel,
   onAction,
   actionHref,
+  className,
 }: EmptyStateProps) {
   const ActionButton = actionLabel ? (
     actionHref ? (
@@ -31,20 +34,14 @@ export function EmptyState({
   ) : null;
 
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-8 text-center">
-      <div 
-        className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6"
-        style={{ backgroundColor: 'rgba(99, 102, 241, 0.1)' }}
-      >
-        <Icon size={40} style={{ color: 'var(--primary)' }} />
+    <div className={cn('flex flex-col items-center justify-center py-16 px-8 text-center', className)}>
+      <div className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6 bg-indigo-500/10 border border-indigo-500/20">
+        <Icon size={40} className="text-indigo-400" aria-hidden="true" />
       </div>
-      <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+      <h3 className="text-xl font-semibold mb-2 text-[var(--text-primary)]">
         {title}
       </h3>
-      <p 
-        className="max-w-sm mb-6"
-        style={{ color: 'var(--text-muted)' }}
-      >
+      <p className="max-w-sm mb-6 text-sm text-[var(--text-muted)]">
         {description}
       </p>
       {ActionButton}

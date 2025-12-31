@@ -166,19 +166,19 @@ export function TopBar() {
   
   return (
     <header 
-      className="fixed top-0 right-0 h-16 bg-[rgba(17,17,24,0.9)] backdrop-blur-xl border-b border-[var(--border)] z-40 flex items-center justify-between px-6 left-0 lg:left-64"
+      className="fixed top-0 right-0 h-16 bg-[var(--bg-secondary)]/90 backdrop-blur-xl border-b border-[var(--border)] z-40 flex items-center justify-between px-4 sm:px-6 left-0 lg:left-64"
       role="banner"
     >
       <div className="ml-12 lg:ml-0">
         <h1 className="text-lg font-semibold text-[var(--text-primary)]">{getPageTitle()}</h1>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         <button 
-          className="relative p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors rounded-lg hover:bg-[var(--bg-card)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
+          className="relative p-2.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors rounded-lg hover:bg-[var(--bg-card)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] group"
           aria-label="Notifications"
         >
-          <Bell size={20} aria-hidden="true" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" aria-hidden="true" />
+          <Bell size={20} className="group-hover:scale-110 transition-transform" aria-hidden="true" />
+          <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-[var(--bg-secondary)]" aria-hidden="true" />
           <span className="sr-only">3 unread notifications</span>
         </button>
         
@@ -186,18 +186,18 @@ export function TopBar() {
         <div className="relative">
           <button 
             onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-2 p-1 rounded-lg hover:bg-[var(--bg-card)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
+            className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-[var(--bg-card)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
             aria-expanded={showUserMenu}
             aria-haspopup="true"
           >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center overflow-hidden">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center overflow-hidden ring-2 ring-transparent hover:ring-[var(--border)]">
               {userImage ? (
                 <img src={userImage} alt="" className="w-full h-full object-cover" />
               ) : (
                 <User size={16} className="text-white" aria-hidden="true" />
               )}
             </div>
-            <ChevronDown size={14} className="text-[var(--text-muted)]" aria-hidden="true" />
+            <ChevronDown size={14} className={cn("text-[var(--text-muted)] transition-transform", showUserMenu && "rotate-180")} aria-hidden="true" />
           </button>
 
           {showUserMenu && (
@@ -207,24 +207,30 @@ export function TopBar() {
                 onClick={() => setShowUserMenu(false)}
                 aria-hidden="true"
               />
-              <div className="absolute right-0 top-full mt-2 w-48 bg-[var(--bg-card)] border border-[var(--border)] rounded-lg shadow-lg z-20 py-1">
-                <div className="px-4 py-2 border-b border-[var(--border)]">
-                  <p className="text-sm font-medium truncate">{userName}</p>
+              <div className="absolute right-0 top-full mt-2 w-56 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl shadow-xl z-20 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="px-4 py-3 border-b border-[var(--border)]">
+                  <p className="text-sm font-medium truncate text-[var(--text-primary)]">{userName}</p>
                   <p className="text-xs text-[var(--text-muted)] truncate">{session?.user?.email}</p>
                 </div>
-                <Link
-                  href="/dashboard/settings"
-                  onClick={() => setShowUserMenu(false)}
-                  className="block px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
-                >
-                  Settings
-                </Link>
-                <button
-                  onClick={() => signOut({ callbackUrl: '/' })}
-                  className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10"
-                >
-                  Sign Out
-                </button>
+                <div className="py-1">
+                  <Link
+                    href="/dashboard/settings"
+                    onClick={() => setShowUserMenu(false)}
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors"
+                  >
+                    <Settings size={16} aria-hidden="true" />
+                    Settings
+                  </Link>
+                </div>
+                <div className="border-t border-[var(--border)] pt-1">
+                  <button
+                    onClick={() => signOut({ callbackUrl: '/' })}
+                    className="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                  >
+                    <LogOut size={16} aria-hidden="true" />
+                    Sign Out
+                  </button>
+                </div>
               </div>
             </>
           )}

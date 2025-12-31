@@ -1,6 +1,7 @@
 'use client';
 
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface StatCardProps {
   title: string;
@@ -18,42 +19,55 @@ export function StatCard({
   change,
   changeType = 'neutral',
   icon: Icon,
-  iconColor = '#6366f1',
+  iconColor = 'indigo',
+  className,
 }: StatCardProps) {
-  const changeColors = {
-    positive: '#4ade80',
-    negative: '#f87171',
-    neutral: '#64748b'
+  const iconColorClasses: Record<string, { bg: string; text: string }> = {
+    indigo: { bg: 'bg-indigo-500/20', text: 'text-indigo-400' },
+    cyan: { bg: 'bg-cyan-500/20', text: 'text-cyan-400' },
+    green: { bg: 'bg-green-500/20', text: 'text-green-400' },
+    purple: { bg: 'bg-purple-500/20', text: 'text-purple-400' },
+    orange: { bg: 'bg-orange-500/20', text: 'text-orange-400' },
+    pink: { bg: 'bg-pink-500/20', text: 'text-pink-400' },
   };
+
+  const changeConfig = {
+    positive: { color: 'text-green-400', icon: TrendingUp },
+    negative: { color: 'text-red-400', icon: TrendingDown },
+    neutral: { color: 'text-slate-500', icon: Minus },
+  };
+
+  const colors = iconColorClasses[iconColor] || iconColorClasses.indigo;
+  const changeInfo = changeConfig[changeType];
+  const ChangeIcon = changeInfo.icon;
 
   return (
     <div 
-      style={{
-        backgroundColor: 'var(--bg-card)',
-        border: '1px solid var(--border)',
-        borderRadius: '12px',
-        padding: '20px',
-        transition: 'all 0.3s ease'
-      }}
+      className={cn(
+        'bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-5',
+        'transition-all duration-300 hover:border-[var(--border-hover)] hover:bg-[var(--bg-card-hover)]',
+        'group',
+        className
+      )}
     >
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-        <div>
-          <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '4px' }}>{title}</p>
-          <p style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{value}</p>
+      <div className="flex items-start justify-between">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm text-[var(--text-muted)] mb-1 truncate">{title}</p>
+          <p className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">{value}</p>
           {change && (
-            <p style={{ fontSize: '14px', marginTop: '4px', color: changeColors[changeType] }}>
-              {change}
-            </p>
+            <div className={cn('flex items-center gap-1 mt-2 text-sm', changeInfo.color)}>
+              <ChangeIcon size={14} aria-hidden="true" />
+              <span>{change}</span>
+            </div>
           )}
         </div>
         <div 
-          style={{ 
-            padding: '12px', 
-            borderRadius: '8px',
-            backgroundColor: `${iconColor}20`
-          }}
+          className={cn(
+            'p-3 rounded-lg transition-transform duration-300 group-hover:scale-110',
+            colors.bg
+          )}
         >
-          <Icon size={22} style={{ color: iconColor }} />
+          <Icon size={22} className={colors.text} aria-hidden="true" />
         </div>
       </div>
     </div>
