@@ -111,7 +111,7 @@ export default function SignupPage() {
           {error && (
             <div style={{
               display: 'flex',
-              alignItems: 'center',
+              alignItems: 'flex-start',
               gap: '8px',
               padding: '12px',
               backgroundColor: 'rgba(239, 68, 68, 0.1)',
@@ -119,8 +119,15 @@ export default function SignupPage() {
               borderRadius: '8px',
               marginBottom: '16px'
             }}>
-              <AlertCircle size={18} style={{ color: '#ef4444' }} />
-              <span style={{ color: '#ef4444', fontSize: '14px' }}>{error}</span>
+              <AlertCircle size={18} style={{ color: '#ef4444', flexShrink: 0, marginTop: '2px' }} />
+              <div style={{ fontSize: '14px' }}>
+                <span style={{ color: '#ef4444' }}>{error}</span>
+                {error.includes('already exists') && (
+                  <Link href="/login" style={{ display: 'block', color: 'var(--primary)', marginTop: '4px', textDecoration: 'underline' }}>
+                    Go to Sign In →
+                  </Link>
+                )}
+              </div>
             </div>
           )}
 

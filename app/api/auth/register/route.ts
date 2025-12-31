@@ -36,15 +36,24 @@ export async function POST(req: NextRequest) {
     const { name, email, password } = registerSchema.parse(body);
 
     // Check if user exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
+    let existingUser;
+    try {
+      existingUser = await prisma.user.findUnique({
+        where: { email },
+      });
+    } catch (dbError) {
+      console.error("Database connection error during user lookup:", dbError);
+      return NextResponse.json(
+        { error: "Database connection error. Please try again." },
+        { status: 503 }
+      );
+    }
 
     if (existingUser) {
-      // Return generic message to prevent user enumeration
+      // Return specific message for existing user
       return NextResponse.json(
-        { error: "Unable to create account. Please try a different email." },
-        { status: 400 }
+        { error: "An account with this email already exists. Please sign in instead." },
+        { status: 409 }
       );
     }
 
@@ -52,14 +61,30 @@ export async function POST(req: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 12);
 
     // Create user
-    const user = await prisma.user.create({
-      data: {
-        name: name.trim(),
-        email,
-        password: hashedPassword,
-        plan: "free",
-      },
-    });
+    let user;
+    try {
+      user = await prisma.user.create({
+        data: {
+          name: name.trim(),
+          email,
+          password: hashedPassword,
+          plan: "free",
+        },
+      });
+    } catch (createError) {
+      console.error("Error creating user:", createError);
+      // Check for unique constraint violation (race condition)
+      if ((createError as { code?: string }).code === 'P2002') {
+        return NextResponse.json(
+          { error: "An account with this email already exists. Please sign in instead." },
+          { status: 409 }
+        );
+      }
+      return NextResponse.json(
+        { error: "Failed to create account. Please try again." },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(
       { 
@@ -78,7 +103,7 @@ export async function POST(req: NextRequest) {
     }
     console.error("Registration error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Something went wrong. Please try again." },
       { status: 500 }
     );
   }
