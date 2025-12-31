@@ -1,10 +1,40 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+
+// Security headers to add to all responses
+const securityHeaders = {
+  'X-Frame-Options': 'DENY',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'X-XSS-Protection': '1; mode=block',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+};
 
 export default withAuth(
-  function middleware(req) {
-    // Allow the request to proceed
-    return NextResponse.next();
+  function middleware(req: NextRequest) {
+    const response = NextResponse.next();
+    
+    // Add security headers to all responses
+    Object.entries(securityHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
+    
+    // Add CSP header (separate for readability)
+    response.headers.set(
+      'Content-Security-Policy',
+      [
+        "default-src 'self'",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' data: https: blob:",
+        "font-src 'self' data:",
+        "connect-src 'self' https:",
+        "frame-ancestors 'none'",
+      ].join('; ')
+    );
+    
+    return response;
   },
   {
     callbacks: {
@@ -20,7 +50,7 @@ export default withAuth(
         }
 
         // Protected paths require authentication
-        if (path.startsWith("/dashboard")) {
+        if (path.startsWith("/dashboard") || path.startsWith("/api/")) {
           return !!token;
         }
 
@@ -32,10 +62,7 @@ export default withAuth(
 
 export const config = {
   matcher: [
-    "/dashboard/:path*",
-    "/api/videos/:path*",
-    "/api/clips/:path*",
-    "/api/schedule/:path*",
-    "/api/user/:path*",
+    // Match all paths except static files and images
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

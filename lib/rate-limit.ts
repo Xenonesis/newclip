@@ -68,9 +68,9 @@ if (typeof setInterval !== 'undefined') {
   }, 60 * 1000); // Clean up every minute
 }
 
-export function rateLimitResponse(reset: number): NextResponse {
+export function rateLimitResponse(reset: number, message?: string): NextResponse {
   return NextResponse.json(
-    { error: 'Too many requests. Please try again later.' },
+    { error: message || 'Too many requests. Please try again later.' },
     { 
       status: 429,
       headers: {

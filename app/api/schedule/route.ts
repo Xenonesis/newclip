@@ -2,18 +2,28 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { z } from "zod";
 
+const fetchLimiter = rateLimit({ interval: 60 * 1000, limit: 60 });
+const mutateLimiter = rateLimit({ interval: 60 * 1000, limit: 30 });
+
 const scheduleSchema = z.object({
-  clipId: z.string(),
+  clipId: z.string().min(1, "Clip ID is required"),
   platform: z.enum(["INSTAGRAM", "TIKTOK", "YOUTUBE", "LINKEDIN", "TWITTER", "FACEBOOK"]),
-  scheduledAt: z.string().datetime(),
-  caption: z.string().optional(),
-  hashtags: z.array(z.string()).optional(),
+  scheduledAt: z.string().datetime("Invalid date format"),
+  caption: z.string().max(2200, "Caption too long").optional(),
+  hashtags: z.array(z.string().max(50)).max(30).optional(),
 });
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting
+    const { success, remaining, reset } = await mutateLimiter(req);
+    if (!success) {
+      return rateLimitResponse(reset);
+    }
+
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -50,10 +60,18 @@ export async function POST(req: NextRequest) {
       data: { status: "SCHEDULED" },
     });
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       message: "Post scheduled successfully",
-      post: scheduledPost,
+      post: {
+        id: scheduledPost.id,
+        platform: scheduledPost.platform,
+        scheduledAt: scheduledPost.scheduledAt.toISOString(),
+        status: scheduledPost.status,
+      },
     });
+    
+    response.headers.set('X-RateLimit-Remaining', remaining.toString());
+    return response;
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -71,6 +89,12 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
+    // Rate limiting
+    const { success, remaining, reset } = await fetchLimiter(req);
+    if (!success) {
+      return rateLimitResponse(reset);
+    }
+
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -105,7 +129,19 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ posts });
+    const response = NextResponse.json({
+      posts: posts.map(p => ({
+        id: p.id,
+        platform: p.platform,
+        scheduledAt: p.scheduledAt.toISOString(),
+        status: p.status,
+        caption: p.caption,
+        clip: p.clip,
+      })),
+    });
+    
+    response.headers.set('X-RateLimit-Remaining', remaining.toString());
+    return response;
   } catch (error) {
     console.error("Fetch schedule error:", error);
     return NextResponse.json(
@@ -117,6 +153,12 @@ export async function GET(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
+    // Rate limiting
+    const { success, remaining, reset } = await mutateLimiter(req);
+    if (!success) {
+      return rateLimitResponse(reset);
+    }
+
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -143,7 +185,9 @@ export async function DELETE(req: NextRequest) {
       where: { id: postId },
     });
 
-    return NextResponse.json({ message: "Post deleted successfully" });
+    const response = NextResponse.json({ message: "Post deleted successfully" });
+    response.headers.set('X-RateLimit-Remaining', remaining.toString());
+    return response;
   } catch (error) {
     console.error("Delete schedule error:", error);
     return NextResponse.json(
