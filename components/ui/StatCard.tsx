@@ -1,6 +1,5 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import { LucideIcon } from 'lucide-react';
 
 interface StatCardProps {
@@ -19,33 +18,40 @@ export function StatCard({
   change,
   changeType = 'neutral',
   icon: Icon,
-  iconColor = 'var(--primary)',
-  className
+  iconColor = '#6366f1',
 }: StatCardProps) {
   const changeColors = {
-    positive: 'text-green-400',
-    negative: 'text-red-400',
-    neutral: 'text-[var(--text-muted)]'
+    positive: '#4ade80',
+    negative: '#f87171',
+    neutral: '#64748b'
   };
 
   return (
-    <div className={cn(
-      'bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-5 hover:border-[var(--border-hover)] transition-all duration-300',
-      className
-    )}>
-      <div className="flex items-start justify-between">
+    <div 
+      style={{
+        backgroundColor: 'var(--bg-card)',
+        border: '1px solid var(--border)',
+        borderRadius: '12px',
+        padding: '20px',
+        transition: 'all 0.3s ease'
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
-          <p className="text-sm text-[var(--text-muted)] mb-1">{title}</p>
-          <p className="text-2xl font-bold text-[var(--text-primary)]">{value}</p>
+          <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '4px' }}>{title}</p>
+          <p style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{value}</p>
           {change && (
-            <p className={cn('text-sm mt-1', changeColors[changeType])}>
+            <p style={{ fontSize: '14px', marginTop: '4px', color: changeColors[changeType] }}>
               {change}
             </p>
           )}
         </div>
         <div 
-          className="p-3 rounded-lg"
-          style={{ backgroundColor: `${iconColor}15` }}
+          style={{ 
+            padding: '12px', 
+            borderRadius: '8px',
+            backgroundColor: `${iconColor}20`
+          }}
         >
           <Icon size={22} style={{ color: iconColor }} />
         </div>
