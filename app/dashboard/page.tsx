@@ -79,7 +79,7 @@ export default function DashboardPage() {
       {/* Stats Grid */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(4, 1fr)', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', 
         gap: '20px' 
       }}>
         {stats.map((stat) => (
@@ -98,7 +98,7 @@ export default function DashboardPage() {
       {/* Two Column Layout */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', 
         gap: '24px' 
       }}>
         {/* Processing Videos */}
@@ -341,7 +341,7 @@ export default function DashboardPage() {
         </h3>
         <div style={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(3, 1fr)', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
           gap: '16px' 
         }}>
           <QuickAction 

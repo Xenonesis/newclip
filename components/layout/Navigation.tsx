@@ -35,21 +35,21 @@ export function Sidebar() {
         top: 0, 
         width: '256px', 
         height: '100vh',
-        backgroundColor: 'var(--bg-secondary)',
-        borderRight: '1px solid var(--border)',
+        backgroundColor: '#0d0d12',
+        borderRight: '1px solid rgba(255,255,255,0.1)',
         zIndex: 50,
         display: 'flex',
         flexDirection: 'column'
       }}
     >
       {/* Logo */}
-      <div style={{ padding: '24px', borderBottom: '1px solid var(--border)' }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+      <div style={{ padding: '24px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
           <div style={{
-            width: '36px',
-            height: '36px',
+            width: '38px',
+            height: '38px',
             borderRadius: '10px',
-            background: 'linear-gradient(to bottom right, #6366f1, #a855f7)',
+            background: 'linear-gradient(135deg, #6366f1, #a855f7)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
@@ -57,9 +57,9 @@ export function Sidebar() {
             <Sparkles size={20} style={{ color: 'white' }} />
           </div>
           <span style={{ 
-            fontSize: '20px', 
-            fontWeight: 'bold', 
-            background: 'linear-gradient(to right, #6366f1, #a855f7)', 
+            fontSize: '22px', 
+            fontWeight: 700, 
+            background: 'linear-gradient(90deg, #6366f1, #a855f7)', 
             WebkitBackgroundClip: 'text', 
             WebkitTextFillColor: 'transparent' 
           }}>
@@ -78,13 +78,14 @@ export function Sidebar() {
             justifyContent: 'center',
             gap: '8px',
             width: '100%',
-            padding: '12px',
-            background: 'linear-gradient(to right, #6366f1, #a855f7, #ec4899)',
+            padding: '12px 16px',
+            background: 'linear-gradient(90deg, #6366f1, #a855f7, #ec4899)',
             color: 'white',
             borderRadius: '10px',
-            fontWeight: 500,
+            fontWeight: 600,
+            fontSize: '14px',
             textDecoration: 'none',
-            boxShadow: '0 4px 14px rgba(99, 102, 241, 0.35)'
+            boxShadow: '0 4px 14px rgba(99, 102, 241, 0.4)'
           }}
         >
           <Upload size={18} />
@@ -109,9 +110,10 @@ export function Sidebar() {
                 marginBottom: '4px',
                 textDecoration: 'none',
                 fontWeight: 500,
+                fontSize: '14px',
                 backgroundColor: isActive ? '#6366f1' : 'transparent',
-                color: isActive ? 'white' : 'var(--text-secondary)',
-                boxShadow: isActive ? '0 4px 12px rgba(99, 102, 241, 0.25)' : 'none'
+                color: isActive ? 'white' : '#94a3b8',
+                boxShadow: isActive ? '0 4px 12px rgba(99, 102, 241, 0.3)' : 'none'
               }}
             >
               <item.icon size={20} />
@@ -122,22 +124,22 @@ export function Sidebar() {
       </nav>
 
       {/* User Section */}
-      <div style={{ padding: '16px', borderTop: '1px solid var(--border)' }}>
+      <div style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 12px' }}>
           <div style={{
-            width: '40px',
-            height: '40px',
+            width: '42px',
+            height: '42px',
             borderRadius: '50%',
-            background: 'linear-gradient(to bottom right, #22d3ee, #3b82f6)',
+            background: 'linear-gradient(135deg, #22d3ee, #3b82f6)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
           }}>
-            <User size={18} style={{ color: 'white' }} />
+            <User size={20} style={{ color: 'white' }} />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)' }}>User</p>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Pro Plan</p>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: 'white' }}>User</p>
+            <p style={{ fontSize: '12px', color: '#64748b' }}>Pro Plan</p>
           </div>
         </div>
       </div>
@@ -167,9 +169,9 @@ export function TopBar() {
         left: '256px',
         right: 0,
         height: '64px',
-        backgroundColor: 'rgba(17, 17, 24, 0.9)',
+        backgroundColor: 'rgba(13, 13, 18, 0.95)',
         backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid var(--border)',
+        borderBottom: '1px solid rgba(255,255,255,0.1)',
         zIndex: 40,
         display: 'flex',
         alignItems: 'center',
@@ -178,14 +180,14 @@ export function TopBar() {
       }}
     >
       <div>
-        <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)' }}>{getPageTitle()}</h1>
+        <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'white' }}>{getPageTitle()}</h1>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <button 
           style={{ 
             position: 'relative',
             padding: '10px', 
-            color: 'var(--text-secondary)',
+            color: '#94a3b8',
             background: 'none',
             border: 'none',
             borderRadius: '8px',
@@ -207,7 +209,7 @@ export function TopBar() {
           width: '36px',
           height: '36px',
           borderRadius: '50%',
-          background: 'linear-gradient(to bottom right, #22d3ee, #3b82f6)',
+          background: 'linear-gradient(135deg, #22d3ee, #3b82f6)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

@@ -6,16 +6,15 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-primary)' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0f' }}>
       <Sidebar />
       <TopBar />
       <main 
-        id="main-content"
         style={{ 
           marginLeft: '256px', 
           paddingTop: '64px', 
           minHeight: '100vh',
-          backgroundColor: 'var(--bg-primary)'
+          backgroundColor: '#0a0a0f'
         }}
       >
         <div style={{ padding: '24px' }}>
