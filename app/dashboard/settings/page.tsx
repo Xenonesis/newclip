@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSession, signOut } from 'next-auth/react';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
 import { cn } from '@/lib/utils';
 import { 
   User,
@@ -17,7 +19,10 @@ import {
   Check,
   Plus,
   Trash2,
-  ExternalLink
+  ExternalLink,
+  Loader2,
+  Menu,
+  X
 } from 'lucide-react';
 
 const tabs = [
@@ -31,15 +36,19 @@ const tabs = [
 ];
 
 const connectedAccounts = [
-  { platform: 'Instagram', username: '@aditya_creates', connected: true, icon: '📸' },
-  { platform: 'TikTok', username: '@aditya.tech', connected: true, icon: '🎵' },
-  { platform: 'YouTube', username: 'Aditya Tech', connected: true, icon: '▶️' },
+  { platform: 'Instagram', username: null, connected: false, icon: '📸' },
+  { platform: 'TikTok', username: null, connected: false, icon: '🎵' },
+  { platform: 'YouTube', username: null, connected: false, icon: '▶️' },
   { platform: 'LinkedIn', username: null, connected: false, icon: '💼' },
   { platform: 'Twitter', username: null, connected: false, icon: '🐦' },
 ];
 
 export default function SettingsPage() {
+  const { data: session, status } = useSession();
   const [activeTab, setActiveTab] = useState('profile');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [theme, setTheme] = useState('dark');
   const [notifications, setNotifications] = useState({
     email: true,
     push: true,
@@ -47,6 +56,52 @@ export default function SettingsPage() {
     weeklyReport: false,
     marketing: false,
   });
+  const [profile, setProfile] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+  });
+
+  useEffect(() => {
+    if (session?.user) {
+      const [firstName = '', lastName = ''] = (session.user.name || '').split(' ');
+      setProfile({
+        firstName,
+        lastName,
+        email: session.user.email || '',
+      });
+    }
+  }, [session]);
+
+  const handleSaveProfile = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch('/api/user', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `${profile.firstName} ${profile.lastName}`.trim(),
+        }),
+      });
+      if (!res.ok) throw new Error('Failed to update profile');
+    } catch (err) {
+      console.error('Failed to save profile:', err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleLogout = () => {
+    signOut({ callbackUrl: '/login' });
+  };
+
+  const handleThemeChange = (newTheme: string) => {
+    setTheme(newTheme);
+    // In a real app, persist to localStorage and apply to document
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('theme', newTheme);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -57,30 +112,87 @@ export default function SettingsPage() {
         </p>
       </div>
 
+      {/* Mobile Tab Selector */}
+      <div className="lg:hidden">
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="w-full flex items-center justify-between p-4 bg-[var(--bg-card)] border border-[var(--border)] rounded-lg"
+          aria-expanded={mobileMenuOpen}
+          aria-controls="settings-menu"
+        >
+          <span className="flex items-center gap-3">
+            {(() => {
+              const CurrentIcon = tabs.find(t => t.id === activeTab)?.icon || User;
+              return <CurrentIcon size={18} />;
+            })()}
+            <span className="font-medium">{tabs.find(t => t.id === activeTab)?.label}</span>
+          </span>
+          {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
+        
+        {mobileMenuOpen && (
+          <div id="settings-menu" className="mt-2 bg-[var(--bg-card)] border border-[var(--border)] rounded-lg overflow-hidden">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  setMobileMenuOpen(false);
+                }}
+                className={cn(
+                  'w-full flex items-center gap-3 px-4 py-3 text-left transition-all',
+                  activeTab === tab.id
+                    ? 'bg-[var(--primary)] text-white'
+                    : 'text-[var(--text-secondary)] hover:bg-[var(--bg-card-hover)]'
+                )}
+              >
+                <tab.icon size={18} aria-hidden="true" />
+                <span className="font-medium text-sm">{tab.label}</span>
+              </button>
+            ))}
+            <div className="border-t border-[var(--border)]">
+              <button 
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-4 py-3 text-left text-red-400 hover:bg-red-500/10 transition-all"
+              >
+                <LogOut size={18} aria-hidden="true" />
+                <span className="font-medium text-sm">Log Out</span>
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="flex gap-6">
-        {/* Sidebar */}
-        <div className="w-64 flex-shrink-0">
+        {/* Desktop Sidebar */}
+        <div className="hidden lg:block w-64 flex-shrink-0">
           <Card>
             <CardContent className="p-2">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn(
-                    'w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all',
-                    activeTab === tab.id
-                      ? 'bg-[var(--primary)] text-white'
-                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)]'
-                  )}
-                >
-                  <tab.icon size={18} />
-                  <span className="font-medium text-sm">{tab.label}</span>
-                </button>
-              ))}
+              <nav aria-label="Settings navigation">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    aria-current={activeTab === tab.id ? 'page' : undefined}
+                    className={cn(
+                      'w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all focus:outline-none focus:ring-2 focus:ring-[var(--primary)]',
+                      activeTab === tab.id
+                        ? 'bg-[var(--primary)] text-white'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)]'
+                    )}
+                  >
+                    <tab.icon size={18} aria-hidden="true" />
+                    <span className="font-medium text-sm">{tab.label}</span>
+                  </button>
+                ))}
+              </nav>
               
               <div className="border-t border-[var(--border)] mt-2 pt-2">
-                <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-red-400 hover:bg-red-500/10 transition-all">
-                  <LogOut size={18} />
+                <button 
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-red-400 hover:bg-red-500/10 transition-all focus:outline-none focus:ring-2 focus:ring-red-500"
+                >
+                  <LogOut size={18} aria-hidden="true" />
                   <span className="font-medium text-sm">Log Out</span>
                 </button>
               </div>
@@ -89,17 +201,21 @@ export default function SettingsPage() {
         </div>
 
         {/* Content */}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           {/* Profile Tab */}
           {activeTab === 'profile' && (
             <Card>
               <CardHeader>
-                <h3 className="font-semibold">Profile Settings</h3>
+                <h2 className="font-semibold">Profile Settings</h2>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="flex items-center gap-6">
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
-                    <User size={32} className="text-white" />
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center flex-shrink-0">
+                    {session?.user?.image ? (
+                      <img src={session.user.image} alt="" className="w-full h-full rounded-full object-cover" />
+                    ) : (
+                      <User size={32} className="text-white" aria-hidden="true" />
+                    )}
                   </div>
                   <div>
                     <Button variant="secondary" size="sm">Change Avatar</Button>
@@ -107,36 +223,46 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm text-[var(--text-muted)] mb-2 block">First Name</label>
+                    <label htmlFor="firstName" className="text-sm text-[var(--text-muted)] mb-2 block">First Name</label>
                     <input
+                      id="firstName"
                       type="text"
-                      defaultValue="Aditya"
-                      className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)]"
+                      value={profile.firstName}
+                      onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
                     />
                   </div>
                   <div>
-                    <label className="text-sm text-[var(--text-muted)] mb-2 block">Last Name</label>
+                    <label htmlFor="lastName" className="text-sm text-[var(--text-muted)] mb-2 block">Last Name</label>
                     <input
+                      id="lastName"
                       type="text"
-                      defaultValue="Kumar"
-                      className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)]"
+                      value={profile.lastName}
+                      onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-sm text-[var(--text-muted)] mb-2 block">Email</label>
+                  <label htmlFor="email" className="text-sm text-[var(--text-muted)] mb-2 block">Email</label>
                   <input
+                    id="email"
                     type="email"
-                    defaultValue="aditya@example.com"
-                    className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)]"
+                    value={profile.email}
+                    disabled
+                    className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg text-[var(--text-muted)] cursor-not-allowed"
                   />
+                  <p className="text-xs text-[var(--text-muted)] mt-1">Email cannot be changed</p>
                 </div>
 
                 <div className="flex justify-end">
-                  <Button>Save Changes</Button>
+                  <Button onClick={handleSaveProfile} disabled={saving}>
+                    {saving && <Loader2 size={16} className="animate-spin mr-2" />}
+                    Save Changes
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -188,7 +314,7 @@ export default function SettingsPage() {
           {activeTab === 'notifications' && (
             <Card>
               <CardHeader>
-                <h3 className="font-semibold">Notification Preferences</h3>
+                <h2 className="font-semibold">Notification Preferences</h2>
               </CardHeader>
               <CardContent className="space-y-4">
                 {[
@@ -200,31 +326,20 @@ export default function SettingsPage() {
                 ].map((item) => (
                   <div
                     key={item.key}
-                    className="flex items-center justify-between p-4 rounded-lg bg-[var(--bg-secondary)]"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-lg bg-[var(--bg-secondary)]"
                   >
                     <div>
                       <p className="font-medium">{item.label}</p>
                       <p className="text-sm text-[var(--text-muted)]">{item.desc}</p>
                     </div>
-                    <button
-                      onClick={() => setNotifications({
+                    <ToggleSwitch
+                      checked={notifications[item.key as keyof typeof notifications]}
+                      onChange={(checked) => setNotifications({
                         ...notifications,
-                        [item.key]: !notifications[item.key as keyof typeof notifications]
+                        [item.key]: checked
                       })}
-                      className={cn(
-                        'w-12 h-6 rounded-full transition-all',
-                        notifications[item.key as keyof typeof notifications] 
-                          ? 'bg-[var(--primary)]' 
-                          : 'bg-[var(--bg-card)]'
-                      )}
-                    >
-                      <div className={cn(
-                        'w-5 h-5 rounded-full bg-white transition-all',
-                        notifications[item.key as keyof typeof notifications] 
-                          ? 'translate-x-6' 
-                          : 'translate-x-0.5'
-                      )} />
-                    </button>
+                      label={item.label}
+                    />
                   </div>
                 ))}
               </CardContent>
@@ -356,29 +471,35 @@ export default function SettingsPage() {
           {activeTab === 'appearance' && (
             <Card>
               <CardHeader>
-                <h3 className="font-semibold">Appearance</h3>
+                <h2 className="font-semibold">Appearance</h2>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
                   <label className="text-sm text-[var(--text-muted)] mb-3 block">Theme</label>
-                  <div className="flex gap-4">
-                    {['dark', 'light', 'system'].map((theme) => (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" role="radiogroup" aria-label="Theme selection">
+                    {['dark', 'light', 'system'].map((themeOption) => (
                       <button
-                        key={theme}
+                        key={themeOption}
+                        onClick={() => handleThemeChange(themeOption)}
+                        role="radio"
+                        aria-checked={theme === themeOption}
                         className={cn(
-                          'flex-1 p-4 rounded-lg border-2 transition-all capitalize',
-                          theme === 'dark'
+                          'p-4 rounded-lg border-2 transition-all capitalize focus:outline-none focus:ring-2 focus:ring-[var(--primary)]',
+                          theme === themeOption
                             ? 'border-[var(--primary)] bg-[var(--primary)]/10'
                             : 'border-[var(--border)] hover:border-[var(--border-hover)]'
                         )}
                       >
                         <div className={cn(
                           'w-full h-16 rounded mb-2',
-                          theme === 'dark' ? 'bg-[#0a0a0f]' :
-                          theme === 'light' ? 'bg-white' :
+                          themeOption === 'dark' ? 'bg-[#0a0a0f]' :
+                          themeOption === 'light' ? 'bg-white border border-gray-200' :
                           'bg-gradient-to-r from-[#0a0a0f] to-white'
                         )} />
-                        <span className="text-sm font-medium">{theme}</span>
+                        <span className="text-sm font-medium flex items-center justify-center gap-2">
+                          {theme === themeOption && <Check size={14} aria-hidden="true" />}
+                          {themeOption}
+                        </span>
                       </button>
                     ))}
                   </div>
