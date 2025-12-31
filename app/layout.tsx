@@ -1,5 +1,13 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { SessionProvider } from "@/components/providers/SessionProvider";
 import "./globals.css";
+
+const inter = Inter({ 
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   title: "ClipFlow AI - Turn Long Videos Into Viral Clips",
@@ -10,6 +18,16 @@ export const metadata: Metadata = {
     title: "ClipFlow AI - Turn Long Videos Into Viral Clips",
     description: "AI-powered video repurposing and social media management platform",
     type: "website",
+    url: "https://clipflow.ai",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ClipFlow AI - Turn Long Videos Into Viral Clips",
+    description: "AI-powered video repurposing and social media management platform",
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
@@ -19,14 +37,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-      </head>
-      <body className="antialiased">
-        {children}
+    <html lang="en" className={inter.variable}>
+      <body className={`${inter.className} antialiased`}>
+        {/* Skip to main content link for accessibility */}
+        <a 
+          href="#main-content" 
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-[var(--primary)] focus:text-white focus:rounded-lg focus:outline-none"
+        >
+          Skip to main content
+        </a>
+        <SessionProvider>
+          {children}
+        </SessionProvider>
       </body>
     </html>
   );

@@ -1,7 +1,7 @@
 'use client';
 
+import { useSession } from 'next-auth/react';
 import { StatCard } from '@/components/ui/StatCard';
-import { Card, CardHeader, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { formatNumber } from '@/lib/utils';
 import Link from 'next/link';
@@ -38,29 +38,26 @@ const topClips = [
   { id: 3, title: 'Work From Home Setup', viralityScore: 85, views: 6500, duration: 55 },
 ];
 
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
 export default function DashboardPage() {
+  const { data: session } = useSession();
+  const userName = session?.user?.name?.split(' ')[0] || 'there';
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
       {/* Welcome Header */}
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'space-between', 
-        flexWrap: 'wrap', 
-        gap: '16px',
-        paddingBottom: '8px',
-        borderBottom: '1px solid var(--border)'
-      }}>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-[var(--border)]">
         <div>
-          <h1 style={{ 
-            fontSize: '28px', 
-            fontWeight: 700, 
-            color: 'var(--text-primary)',
-            marginBottom: '6px'
-          }}>
-            Good morning, Aditya! 👋
+          <h1 className="text-2xl sm:text-[28px] font-bold text-[var(--text-primary)] mb-1.5">
+            {getGreeting()}, {userName}! 👋
           </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '15px' }}>
+          <p className="text-[var(--text-secondary)] text-sm sm:text-[15px]">
             Here&apos;s what&apos;s happening with your content today
           </p>
         </div>
@@ -69,12 +66,8 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      {/* Stats Grid */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(4, 1fr)', 
-        gap: '20px'
-      }}>
+      {/* Stats Grid - Responsive */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
         {stats.map((stat) => (
           <StatCard
             key={stat.title}
@@ -88,12 +81,8 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Two Column Layout */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '24px' 
-      }}>
+      {/* Two Column Layout - Responsive */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Processing Videos */}
         <div style={{
           backgroundColor: 'var(--bg-card)',
@@ -337,11 +326,7 @@ export default function DashboardPage() {
         }}>
           Quick Actions
         </h3>
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(3, 1fr)', 
-          gap: '16px' 
-        }}>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <QuickAction 
             icon={Upload}
             title="Upload Video"

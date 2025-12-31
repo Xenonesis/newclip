@@ -1,6 +1,7 @@
 'use client';
 
 import { LucideIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
@@ -10,6 +11,19 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
   children: React.ReactNode;
 }
+
+const variantClasses = {
+  primary: 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg shadow-indigo-500/35 hover:opacity-90 focus-visible:ring-indigo-500',
+  secondary: 'bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border)] hover:bg-[var(--bg-card-hover)] hover:border-[var(--border-hover)] focus-visible:ring-[var(--primary)]',
+  ghost: 'bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] focus-visible:ring-[var(--primary)]',
+  danger: 'bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 focus-visible:ring-red-500',
+};
+
+const sizeClasses = {
+  sm: 'px-3 py-1.5 text-[13px] gap-1.5',
+  md: 'px-4 py-2 text-sm gap-2',
+  lg: 'px-6 py-3 text-base gap-2',
+};
 
 export function Button({
   variant = 'primary',
@@ -22,80 +36,33 @@ export function Button({
   disabled,
   ...props
 }: ButtonProps) {
-  const getVariantStyles = () => {
-    switch (variant) {
-      case 'primary':
-        return {
-          background: 'linear-gradient(to right, #6366f1, #a855f7, #ec4899)',
-          color: '#ffffff',
-          border: 'none',
-          boxShadow: '0 4px 14px rgba(99, 102, 241, 0.35)'
-        };
-      case 'secondary':
-        return {
-          background: 'var(--bg-card)',
-          color: 'var(--text-primary)',
-          border: '1px solid var(--border)'
-        };
-      case 'ghost':
-        return {
-          background: 'transparent',
-          color: 'var(--text-secondary)',
-          border: 'none'
-        };
-      case 'danger':
-        return {
-          background: 'rgba(239, 68, 68, 0.1)',
-          color: '#f87171',
-          border: '1px solid rgba(239, 68, 68, 0.3)'
-        };
-    }
-  };
-
-  const getSizeStyles = () => {
-    switch (size) {
-      case 'sm':
-        return { padding: '6px 12px', fontSize: '13px', gap: '6px' };
-      case 'md':
-        return { padding: '8px 16px', fontSize: '14px', gap: '8px' };
-      case 'lg':
-        return { padding: '12px 24px', fontSize: '16px', gap: '8px' };
-    }
-  };
-
-  const variantStyles = getVariantStyles();
-  const sizeStyles = getSizeStyles();
-
   return (
     <button
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontWeight: 500,
-        borderRadius: '8px',
-        transition: 'all 0.2s ease',
-        cursor: disabled || loading ? 'not-allowed' : 'pointer',
-        opacity: disabled || loading ? 0.5 : 1,
-        ...variantStyles,
-        ...sizeStyles
-      }}
+      className={cn(
+        'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200',
+        'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-primary)]',
+        variantClasses[variant],
+        sizeClasses[size],
+        (disabled || loading) && 'opacity-50 cursor-not-allowed pointer-events-none',
+        className
+      )}
       disabled={disabled || loading}
       {...props}
     >
       {loading ? (
         <svg 
-          style={{ animation: 'spin 1s linear infinite', height: '16px', width: '16px' }} 
+          className="animate-spin h-4 w-4"
+          aria-hidden="true"
           viewBox="0 0 24 24"
         >
-          <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-          <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
         </svg>
       ) : Icon && iconPosition === 'left' ? (
-        <Icon size={size === 'sm' ? 14 : 16} />
+        <Icon size={size === 'sm' ? 14 : 16} aria-hidden="true" />
       ) : null}
       {children}
-      {!loading && Icon && iconPosition === 'right' && <Icon size={size === 'sm' ? 14 : 16} />}
+      {!loading && Icon && iconPosition === 'right' && <Icon size={size === 'sm' ? 14 : 16} aria-hidden="true" />}
     </button>
   );
 }

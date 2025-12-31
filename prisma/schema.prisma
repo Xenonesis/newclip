@@ -1,0 +1,273 @@
+// Prisma Schema for ClipFlow AI
+// Based on database-schema.md specifications
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============== AUTH MODELS ==============
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  name          String?
+  password      String?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  accounts         Account[]
+  sessions         Session[]
+  videos           Video[]
+  clips            Clip[]
+  scheduledPosts   ScheduledPost[]
+  socialAccounts   SocialAccount[]
+  subscription     Subscription?
+  apiKeys          ApiKey[]
+  notifications    Notification[]
+
+  // Plan info
+  plan          String    @default("free")
+  planExpiresAt DateTime?
+
+  @@index([email])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ============== CONTENT MODELS ==============
+
+model Video {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  description String?  @db.Text
+  sourceUrl   String?
+  fileUrl     String?
+  thumbnailUrl String?
+  duration    Int?     // in seconds
+  status      VideoStatus @default(PENDING)
+  processingProgress Int @default(0)
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clips Clip[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Clip {
+  id             String   @id @default(cuid())
+  videoId        String
+  userId         String
+  title          String
+  description    String?  @db.Text
+  fileUrl        String?
+  thumbnailUrl   String?
+  startTime      Int      // in seconds
+  endTime        Int      // in seconds
+  duration       Int      // in seconds
+  aspectRatio    String   @default("9:16")
+  viralityScore  Int      @default(0)
+  status         ClipStatus @default(GENERATED)
+  topics         String[]
+  transcript     String?  @db.Text
+  captionStyle   String?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  video          Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scheduledPosts ScheduledPost[]
+
+  @@index([videoId])
+  @@index([userId])
+  @@index([viralityScore])
+}
+
+model ScheduledPost {
+  id          String   @id @default(cuid())
+  userId      String
+  clipId      String
+  platform    Platform
+  scheduledAt DateTime
+  publishedAt DateTime?
+  status      PostStatus @default(SCHEDULED)
+  caption     String?  @db.Text
+  hashtags    String[]
+  error       String?
+  externalId  String?  // ID from the platform
+  analytics   Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clip Clip @relation(fields: [clipId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([scheduledAt])
+  @@index([status])
+}
+
+// ============== SOCIAL ACCOUNTS ==============
+
+model SocialAccount {
+  id           String   @id @default(cuid())
+  userId       String
+  platform     Platform
+  platformUserId String
+  username     String?
+  accessToken  String   @db.Text
+  refreshToken String?  @db.Text
+  expiresAt    DateTime?
+  connected    Boolean  @default(true)
+  metadata     Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, platform])
+  @@index([userId])
+}
+
+// ============== BILLING ==============
+
+model Subscription {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  stripeCustomerId    String?  @unique
+  stripeSubscriptionId String? @unique
+  stripePriceId       String?
+  status              SubscriptionStatus @default(INACTIVE)
+  plan                String   @default("free")
+  currentPeriodStart  DateTime?
+  currentPeriodEnd    DateTime?
+  cancelAtPeriodEnd   Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============== API KEYS ==============
+
+model ApiKey {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  key       String   @unique
+  lastUsed  DateTime?
+  createdAt DateTime @default(now())
+  expiresAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([key])
+}
+
+// ============== NOTIFICATIONS ==============
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([read])
+}
+
+// ============== ENUMS ==============
+
+enum VideoStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum ClipStatus {
+  GENERATED
+  EDITED
+  SCHEDULED
+  PUBLISHED
+}
+
+enum PostStatus {
+  SCHEDULED
+  PUBLISHING
+  PUBLISHED
+  FAILED
+}
+
+enum Platform {
+  INSTAGRAM
+  TIKTOK
+  YOUTUBE
+  LINKEDIN
+  TWITTER
+  FACEBOOK
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  PAST_DUE
+  CANCELED
+  TRIALING
+}

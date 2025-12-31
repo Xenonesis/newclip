@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { 
@@ -12,7 +13,9 @@ import {
   Globe,
   CheckCircle,
   ArrowRight,
-  Star
+  Star,
+  Menu,
+  X
 } from 'lucide-react';
 
 const features = [
@@ -37,6 +40,9 @@ const pricingPlans = [
 ];
 
 export default function LandingPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const currentYear = new Date().getFullYear();
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-primary)' }}>
       {/* Navigation */}
@@ -69,22 +75,47 @@ export default function LandingPage() {
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              <Sparkles size={18} style={{ color: 'white' }} />
+              <Sparkles size={18} style={{ color: 'white' }} aria-hidden="true" />
             </div>
             <span style={{ fontSize: '20px', fontWeight: 'bold', background: 'linear-gradient(to right, #6366f1, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>ClipFlow</span>
           </Link>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-8">
             <a href="#features" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Features</a>
             <a href="#pricing" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Pricing</a>
             <a href="#testimonials" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Testimonials</a>
           </div>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <Link href="/dashboard" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Log In</Link>
-            <Link href="/dashboard"><Button>Get Started</Button></Link>
+          <div className="hidden md:flex items-center gap-4">
+            <Link href="/login" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Log In</Link>
+            <Link href="/signup"><Button>Get Started</Button></Link>
           </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 text-[var(--text-secondary)]"
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-[var(--bg-secondary)] border-t border-[var(--border)] py-4 px-6">
+            <div className="flex flex-col gap-4">
+              <a href="#features" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--text-secondary)', textDecoration: 'none', padding: '8px 0' }}>Features</a>
+              <a href="#pricing" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--text-secondary)', textDecoration: 'none', padding: '8px 0' }}>Pricing</a>
+              <a href="#testimonials" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--text-secondary)', textDecoration: 'none', padding: '8px 0' }}>Testimonials</a>
+              <hr style={{ borderColor: 'var(--border)', margin: '8px 0' }} />
+              <Link href="/login" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--text-secondary)', textDecoration: 'none', padding: '8px 0' }}>Log In</Link>
+              <Link href="/signup" onClick={() => setMobileMenuOpen(false)}><Button style={{ width: '100%' }}>Get Started</Button></Link>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}
@@ -362,7 +393,7 @@ export default function LandingPage() {
               <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>API Docs</a>
             </div>
             <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
-              © 2024 ClipFlow AI. All rights reserved.
+              © {currentYear} ClipFlow AI. All rights reserved.
             </p>
           </div>
         </div>

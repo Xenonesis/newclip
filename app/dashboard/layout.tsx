@@ -1,4 +1,5 @@
 import { Sidebar, TopBar } from '@/components/layout/Navigation';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 
 export default function DashboardLayout({
   children,
@@ -10,16 +11,21 @@ export default function DashboardLayout({
       <Sidebar />
       <TopBar />
       <main 
+        id="main-content"
         className="dashboard-main"
         style={{ 
-          marginLeft: '256px', 
+          marginLeft: '0',
           paddingTop: '64px', 
           minHeight: '100vh',
           backgroundColor: 'var(--bg-primary)'
         }}
       >
-        <div style={{ padding: '24px' }}>
-          {children}
+        <div className="lg:ml-64">
+          <div style={{ padding: '24px' }}>
+            <ErrorBoundary>
+              {children}
+            </ErrorBoundary>
+          </div>
         </div>
       </main>
     </div>
